@@ -1,163 +1,98 @@
-// Form validation functions
-function validateRegister() {
-    var username = document.getElementById('username');
-    var email = document.getElementById('email');
-    var password = document.getElementById('password');
-    var confirmPassword = document.getElementById('confirm_password');
+// Validation for all forms
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Validation script loaded');
     
-    var errors = [];
-    
-    // Clear previous errors
-    document.querySelectorAll('.error').forEach(function(el) {
-        el.textContent = '';
+    // Add required attributes to all form inputs
+    const requiredInputs = document.querySelectorAll('input[required], select[required], textarea[required]');
+    requiredInputs.forEach(input => {
+        input.setAttribute('aria-required', 'true');
     });
     
-    // Username validation
-    if (username.value.length < 3) {
-        document.getElementById('usernameError').textContent = 'Username must be at least 3 characters';
-        errors.push('username');
-    }
+    // Add labels to all buttons without text
+    const iconButtons = document.querySelectorAll('.btn:not(:has(span)), .btn:not(:has(img))');
+    iconButtons.forEach(button => {
+        if (!button.textContent.trim() && !button.hasAttribute('title')) {
+            const icon = button.querySelector('i');
+            if (icon) {
+                let title = 'Button';
+                if (icon.classList.contains('fa-camera')) title = 'Upload photo';
+                else if (icon.classList.contains('fa-save')) title = 'Save';
+                else if (icon.classList.contains('fa-trash')) title = 'Delete';
+                else if (icon.classList.contains('fa-edit')) title = 'Edit';
+                button.setAttribute('title', title);
+                button.setAttribute('aria-label', title);
+            }
+        }
+    });
     
-    if (username.value.length > 50) {
-        document.getElementById('usernameError').textContent = 'Username cannot exceed 50 characters';
-        errors.push('username');
-    }
+    // Form validation
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let valid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    valid = false;
+                    field.style.borderColor = '#dc3545';
+                    
+                    // Add error message
+                    let errorSpan = field.nextElementSibling;
+                    if (!errorSpan || !errorSpan.classList.contains('error')) {
+                        errorSpan = document.createElement('span');
+                        errorSpan.className = 'error';
+                        errorSpan.textContent = 'This field is required';
+                        field.parentNode.appendChild(errorSpan);
+                    }
+                } else {
+                    field.style.borderColor = '';
+                    const errorSpan = field.nextElementSibling;
+                    if (errorSpan && errorSpan.classList.contains('error')) {
+                        errorSpan.remove();
+                    }
+                }
+            });
+            
+            if (!valid) {
+                e.preventDefault();
+                alert('Please fill all required fields.');
+            }
+        });
+    });
     
-    // Email validation
-    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email.value)) {
-        document.getElementById('emailError').textContent = 'Please enter a valid email address';
-        errors.push('email');
-    }
+    // Clear errors on input
+    document.addEventListener('input', function(e) {
+        if (e.target.hasAttribute('required')) {
+            e.target.style.borderColor = '';
+            const errorSpan = e.target.nextElementSibling;
+            if (errorSpan && errorSpan.classList.contains('error')) {
+                errorSpan.remove();
+            }
+        }
+    });
     
     // Password validation
-    if (password.value.length < 8) {
-        document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
-        errors.push('password');
-    }
-    
-    // Confirm password
-    if (password.value !== confirmPassword.value) {
-        document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
-        errors.push('confirm_password');
-    }
-    
-    if (errors.length > 0) {
-        errors[0].focus();
-        return false;
-    }
-    
-    return true;
-}
-
-function validateLogin() {
-    var username = document.getElementById('username');
-    var password = document.getElementById('password');
-    
-    if (!username.value.trim()) {
-        alert('Please enter username or email');
-        username.focus();
-        return false;
-    }
-    
-    if (!password.value.trim()) {
-        alert('Please enter password');
-        password.focus();
-        return false;
-    }
-    
-    return true;
-}
-
-function validateProductForm() {
-    var name = document.getElementById('name');
-    var price = document.getElementById('price');
-    var stock = document.getElementById('stock');
-    
-    if (!name.value.trim()) {
-        alert('Please enter product name');
-        name.focus();
-        return false;
-    }
-    
-    if (!price.value || parseFloat(price.value) <= 0) {
-        alert('Please enter a valid price');
-        price.focus();
-        return false;
-    }
-    
-    if (!stock.value || parseInt(stock.value) < 0) {
-        alert('Please enter a valid stock quantity');
-        stock.focus();
-        return false;
-    }
-    
-    return true;
-}
-
-// Real-time validation
-document.addEventListener('DOMContentLoaded', function() {
-    // Password strength indicator
-    var passwordInput = document.getElementById('password');
-    if (passwordInput) {
-        passwordInput.addEventListener('input', function() {
-            var strengthText = '';
-            var strength = 0;
+    const passwordInputs = document.querySelectorAll('input[type="password"]');
+    passwordInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const value = this.value;
+            let strength = 0;
             
-            if (this.value.length >= 8) strength++;
-            if (/[A-Z]/.test(this.value)) strength++;
-            if (/[0-9]/.test(this.value)) strength++;
-            if (/[^A-Za-z0-9]/.test(this.value)) strength++;
+            if (value.length >= 8) strength++;
+            if (/[A-Z]/.test(value)) strength++;
+            if (/[0-9]/.test(value)) strength++;
+            if (/[^A-Za-z0-9]/.test(value)) strength++;
             
-            switch(strength) {
-                case 0:
-                case 1:
-                    strengthText = 'Weak';
-                    break;
-                case 2:
-                    strengthText = 'Moderate';
-                    break;
-                case 3:
-                    strengthText = 'Strong';
-                    break;
-                case 4:
-                    strengthText = 'Very Strong';
-                    break;
-            }
-            
-            var strengthIndicator = document.getElementById('passwordStrength');
-            if (!strengthIndicator && this.value) {
-                strengthIndicator = document.createElement('small');
-                strengthIndicator.id = 'passwordStrength';
-                strengthIndicator.style.display = 'block';
-                strengthIndicator.style.marginTop = '5px';
-                this.parentNode.appendChild(strengthIndicator);
-            }
-            
-            if (strengthIndicator) {
-                strengthIndicator.textContent = 'Strength: ' + strengthText;
-                strengthIndicator.style.color = 
+            const strengthText = document.getElementById('passwordStrength');
+            if (strengthText) {
+                const labels = ['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong'];
+                strengthText.textContent = 'Strength: ' + labels[strength];
+                strengthText.style.color = 
                     strength <= 1 ? '#dc3545' : 
                     strength == 2 ? '#ffc107' : 
                     strength == 3 ? '#28a745' : '#007bff';
             }
         });
-    }
-    
-    // Confirm password real-time check
-    var confirmPassword = document.getElementById('confirm_password');
-    if (confirmPassword) {
-        confirmPassword.addEventListener('input', function() {
-            var password = document.getElementById('password');
-            var errorSpan = document.getElementById('confirmPasswordError');
-            
-            if (password && errorSpan) {
-                if (this.value !== password.value) {
-                    errorSpan.textContent = 'Passwords do not match';
-                } else {
-                    errorSpan.textContent = '';
-                }
-            }
-        });
-    }
+    });
 });

@@ -192,22 +192,6 @@
     font-style: italic;
 }
 
-/* Edit Mode */
-.edit-mode .info-value {
-    padding: 0;
-    background: transparent;
-    border: none;
-}
-
-.edit-mode .form-control {
-    background: white;
-    border: 2px solid var(--border-color);
-}
-
-.edit-mode .form-control:focus {
-    border-color: var(--primary-color);
-}
-
 /* Action Buttons */
 .profile-actions {
     display: flex;
